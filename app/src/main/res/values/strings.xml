@@ -1,0 +1,13 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Stromful</string>
+    <string name="today">Toady</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="format_temp_celsius">
+        <xliff:g id="temp">%1.0f</xliff:g>\u00B0C
+    </string>
+    <string name="format_temp_faranite">
+        <xliff:g id="temp">%1.0f</xliff:g>\u00B0F
+    </string>
+    <string name="action_refresh">Refresh</string>
+    <string name="error_message">An Error Occured! Please Try Again</string>
+</resources>
