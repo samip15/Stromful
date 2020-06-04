@@ -1,62 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp"
-    tools:context=".DetailActivity">
+    tools:context=".DetailActivity"
+    android:padding="8dp">
 
     <TextView
-        android:id="@+id/date"
-        style="@style/TextAppearance.AppCompat.Large"
+        android:id="@+id/tv_display_weather"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Saturday, September 24" />
+        android:textSize="22sp"/>
 
-    <TextView
-        android:id="@+id/weather_description"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rainy" />
-
-
-    <TextView
-        android:id="@+id/high_temperature"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="19\u00b0" />
-
-
-    <TextView
-        android:id="@+id/low_temperature"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="10\u00b0" />
-
-
-    <TextView
-        android:id="@+id/humidity"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="38%" />
-
-
-    <TextView
-        android:id="@+id/pressure"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="900 hPa" />
-
-    <TextView
-        android:id="@+id/wind"
-        style="@style/TextAppearance.AppCompat.Large"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="4 km/h NW" />
-</LinearLayout>
+</FrameLayout>
