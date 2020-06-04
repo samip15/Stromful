@@ -26,8 +26,10 @@ public class OpenWeatherJsonWeather {
                 case HttpURLConnection.HTTP_OK:
                     break;
                 case HttpURLConnection.HTTP_NOT_FOUND:
+                    /* Location invalid */
                     return null;
                 default:
+                    /* Server probably down */
                     return null;
             }
 

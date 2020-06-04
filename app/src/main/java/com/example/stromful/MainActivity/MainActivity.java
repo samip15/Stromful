@@ -6,6 +6,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.stromful.Data.StromfulPrefrences;
+import com.example.stromful.DetailActivity;
 import com.example.stromful.ForcastAdapter;
 import com.example.stromful.R;
 import com.example.stromful.Utilities.NetworkUtils;
@@ -30,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     private SpinKitView mLoadingindicator;
     RecyclerView mrecycler;
     private ForcastAdapter mForcastAdapter;
+    private Context mContext = MainActivity.this;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,8 +45,8 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
         mErrorMessageDisplay = findViewById(R.id.tv_error_message);
         mLoadingindicator = findViewById(R.id.progress_bar_laoding_indicator);
 
-        //set iv
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        //set rv
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mrecycler.setLayoutManager(linearLayoutManager);
         mrecycler.setHasFixedSize(true);
         //adapter
@@ -53,18 +60,21 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
         new FetchWeather().execute(location);
     }
 
-    private void showWeatherDataView(){
+    private void showWeatherDataView() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mrecycler.setVisibility(View.VISIBLE);
     }
-    private void showErrorMessage(){
+
+    private void showErrorMessage() {
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
         mrecycler.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onClick(String weatherfordy) {
-        Toast.makeText(this, "weather day is:"+weatherfordy, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(mContext, DetailActivity.class);
+        intent.putExtra(Intent.EXTRA_TEXT,weatherfordy);
+        startActivity(intent);
     }
 
     /* --------------------------- Async Task---------------------
@@ -104,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
                 showWeatherDataView();
                 mForcastAdapter.setWeatherData(weatherdata);
 
-            }else{
+            } else {
                 showErrorMessage();
             }
         }
@@ -127,6 +137,25 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
             loadWeateerData();
             return true;
         }
+        if (id==R.id.action_map){
+            openLocationInMap();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    /* ----------------------------intents
+
+     */
+    private void openLocationInMap(){
+        String address = StromfulPrefrences.getPreferedWeatherLocation(mContext);
+
+        Uri geoloaction = Uri.parse("geo:0,0?q="+address);
+        Intent intent = new Intent(Intent.ACTION_VIEW,geoloaction);
+        if (intent.resolveActivity(getPackageManager())!=null){
+            startActivity(intent);
+        }
+
+
     }
 }

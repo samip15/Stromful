@@ -53,9 +53,9 @@ public class ForcastAdapter extends RecyclerView.Adapter<ForcastAdapter.ForcastA
     public int getItemCount() {
         if (mWeatherdata == null) {
             return 0;
+        }else {
+            return mWeatherdata.length;
         }
-        return mWeatherdata.length;
-
     }
 
     public class ForcastAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

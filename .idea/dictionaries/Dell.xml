@@ -14,6 +14,7 @@
       <w>formatedhigh</w>
       <w>highlow</w>
       <w>highlowstr</w>
+      <w>loadingindicator</w>
       <w>locationqurry</w>
       <w>mweatherdata</w>
       <w>prefrences</w>
@@ -24,7 +25,9 @@
       <w>temperatureincelsius</w>
       <w>tempereture</w>
       <w>tempersture</w>
+      <w>weateer</w>
       <w>weatherdata</w>
+      <w>weatherfordy</w>
       <w>weatherrequest</w>
       <w>weatherstring</w>
     </words>
