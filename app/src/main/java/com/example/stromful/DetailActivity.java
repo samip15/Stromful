@@ -31,21 +31,22 @@ public class DetailActivity extends AppCompatActivity {
         }
 
     }
-    /* --------------------------Menue
+
+    /* --------------------------Menu
      */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-       getMenuInflater().inflate(R.menu.detail,menu);
+        getMenuInflater().inflate(R.menu.detail, menu);
         MenuItem menuItem = menu.findItem(R.id.action_share);
         menuItem.setIntent(createForcastIntent());
-       return true;
+        return true;
     }
 
     private Intent createForcastIntent() {
         Intent shareintent = ShareCompat.IntentBuilder.from(this)
                 .setType("text/plain")
-                .setText(mForcast+HAS_TAG)
+                .setText(mForcast + HAS_TAG)
                 .getIntent();
         return shareintent;
     }
