@@ -1,14 +1,17 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <EditTextPreference app:title="@string/pref_location_level"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
         android:defaultValue="@string/pref_location_default"
+        android:inputType="text"
         android:key="@string/pref_location_key"
         android:singleLine="true"
-        android:inputType="text"/>
+        android:title="@string/pref_location_label"/>
+
     <ListPreference
-        android:entryValues="@array/pref_unit_value"
-        android:entries="@array/pref_units_option"
-        app:defaultValue="@string/pref_units_metric"
+        android:defaultValue="@string/pref_units_metric"
+        android:entries="@array/pref_units_options"
+        android:entryValues="@array/pref_units_values"
         android:key="@string/pref_units_key"
-        app:title="@string/pref_unit_level"/>
+        android:title="@string/pref_units_label"/>
+
 </PreferenceScreen>
