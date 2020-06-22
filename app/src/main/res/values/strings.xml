@@ -12,4 +12,16 @@
     <string name="error_message">An Error Occured! Please Try Again</string>
     <string name="action_map">Map Location</string>
     <string name="action_share">Share</string>
+    <string name="action_settings">Settings</string>
+    <!-- Preference  -->
+    <string name="pref_location_level">Location</string>
+    <string name="pref_location_default" translatable="false">Kathmandu,Nepal</string>
+    <string name="pref_location_key" translatable="false">location</string>
+    <string name="pref_unit_metric_label">Metric</string>
+    <string name="pref_unit_imperial_label">Imperial</string>
+    <string name="pref_units_metric" translatable="false">metric</string>
+    <string name="pref_units_imperial" translatable="false">imperial</string>
+    <string name="pref_units_key" translatable="false">units</string>
+    <string name="pref_unit_level">Temperature Units</string>
+
 </resources>

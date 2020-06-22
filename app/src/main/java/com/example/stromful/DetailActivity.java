@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 public class DetailActivity extends AppCompatActivity {
-    private TextView mWeatherDisplay;
     private static final String TAG = "DetailActivity";
     private static final String HAS_TAG = "#stromful";
     String mForcast;
@@ -19,7 +18,8 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        mWeatherDisplay = findViewById(R.id.tv_display_weather);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        TextView mWeatherDisplay = findViewById(R.id.tv_display_weather);
 
         //getting intent
         Intent fromForcast = getIntent();
@@ -32,7 +32,7 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    /* --------------------------Menu
+    /* --------------------------Menu-----------------------------
      */
 
     @Override
