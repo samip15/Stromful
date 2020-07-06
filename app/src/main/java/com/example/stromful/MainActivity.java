@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     private ForcastAdapter mForcastAdapter;
     private Context mContext = MainActivity.this;
     // if shared preference has been changed
-    private static boolean  PREFRENCE_UPDATED = false;
+    private static boolean PREFRENCE_UPDATED = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +61,10 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
         // resister preference
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
+
     /*
      *  ----------------------  Loading Functions --------------------------
      * */
-
-
     private void showWeatherDataView() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mrecycler.setVisibility(View.VISIBLE);
@@ -190,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
         }
 
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(MainActivity.this,SettingsActivity.class);
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
             return true;
         }
@@ -229,8 +228,8 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     @Override
     protected void onStart() {
         super.onStart();
-        if (PREFRENCE_UPDATED){
-            getSupportLoaderManager().restartLoader(FORCAST_LOADER_ID,null,this);
+        if (PREFRENCE_UPDATED) {
+            getSupportLoaderManager().restartLoader(FORCAST_LOADER_ID, null, this);
             PREFRENCE_UPDATED = false;
         }
     }
