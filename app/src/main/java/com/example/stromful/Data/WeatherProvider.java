@@ -45,6 +45,7 @@ public class WeatherProvider extends ContentProvider {
 
     /**
      * When Query Data From Content Provider
+     *
      * @param uri:from content resolver
      * @return cursor : containing data
      */
@@ -81,13 +82,14 @@ public class WeatherProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknon Uri" + uri);
         }
         // notifi uri
-        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
 
     /**
      * Insetting all data to content provider at once
-     * @param uri:from content resolver
+     *
+     * @param uri:from      content resolver
      * @param values:insert json weather data
      * @return cursor : containing data
      */
@@ -95,31 +97,30 @@ public class WeatherProvider extends ContentProvider {
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         // uri validation and matching
-        switch (sUriMatcher.match(uri)){
+        switch (sUriMatcher.match(uri)) {
             case CODE_WEATHER:
                 db.beginTransaction();
                 int rowsInserted = 0;
-                try{
-                    for (ContentValues value:values){
+                try {
+                    for (ContentValues value : values) {
                         long weatherDate = value.getAsLong(WeatherContract.WeatherEntry.COLUMN_DATE);
-                        if (StromfulDateUtils.isDateNormalized(weatherDate)){
+                        if (!StromfulDateUtils.isDateNormalized(weatherDate)) {
                             throw new IllegalArgumentException("Date Must Be Normalized TO Insert");
                         }
-                      long _id =  db.insert(WeatherContract.WeatherEntry.TABLE_NAME,null,value);
-                        if (_id!=-1){
+                        long _id = db.insert(WeatherContract.WeatherEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
                             rowsInserted++;
                         }
                     }
                     db.setTransactionSuccessful();
 
-                }catch (Exception e){
+                } catch (Exception e) {
                     throw e;
-                }
-                finally{
+                } finally {
                     db.endTransaction();
                 }
-                if (rowsInserted>0){
-                   getContext().getContentResolver().notifyChange(uri,null);
+                if (rowsInserted > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
                 }
             default:
                 return super.bulkInsert(uri, values);
@@ -141,7 +142,26 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        int numRowsDeleted;
+        if (selection == null) {
+            selection = "1";
+        }
+        // DELETE TABLE WEATHER
+        // 1 = Sqlite documentation: all rows deleted and the total no of deleted rows are returned
+        switch (sUriMatcher.match(uri)) {
+            case CODE_WEATHER:
+                numRowsDeleted = mOpenHelper.getWritableDatabase().delete(
+                        WeatherContract.WeatherEntry.TABLE_NAME,
+                        selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown Uri"+uri);
+        }
+        if (numRowsDeleted!=0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+        return numRowsDeleted;
     }
 
     @Override

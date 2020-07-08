@@ -7,6 +7,7 @@ import com.example.stromful.R;
 
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class StromfulDateUtils {
     public static final long SECOND_IN_MILLIS = 1000;
@@ -80,6 +81,21 @@ public class StromfulDateUtils {
         TimeZone tz = TimeZone.getDefault();
         long gmtOffset = tz.getOffset(localDate);
         return localDate + gmtOffset;
+    }
+    public static long getNormalizedUTCDateForToday(){
+        // aile ko utc time in millis
+        long utcNowMillis = System.currentTimeMillis();
+        // time zone ktm:gmt
+        TimeZone currentTimeZone = TimeZone.getDefault();
+        // +5:45
+        long gmtOffSetMillis = currentTimeZone.getOffset(utcNowMillis);
+        // actual time
+        long timeScinceEpochLocalTimeMillis = utcNowMillis+gmtOffSetMillis;
+        // days
+        long dayScinceEpochLocal = TimeUnit.MICROSECONDS.toDays(timeScinceEpochLocalTimeMillis);
+        // normalized = 00000
+        long normalizedUTCMidnightMillis = TimeUnit.DAYS.toMillis(dayScinceEpochLocal);
+        return normalizedUTCMidnightMillis;
     }
 
     /**

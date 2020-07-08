@@ -2,8 +2,10 @@ package com.example.stromful.Utilities;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
+import com.example.stromful.Data.StromfulPrefrences;
 import com.example.stromful.Data.WeatherContract;
 
 import org.json.JSONArray;
@@ -12,7 +14,12 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
-public class OpenWeatherJsonWeather {
+public class OpenWeatherJsonUtils {
+    // location and lat long from json
+    private static final String OWM_CITY = "city";
+    private static final String OWM_COORD = "coord";
+    private static final String OWM_LATITUDE = "lat";
+    private static final String OWM_LONGITUDE = "lon";
     private static final String OWM_LIST = "list";
     private static final String OWM_WEATHER_ID = "id";
     private static final String OWM_MAX = "temp_max";
@@ -96,13 +103,16 @@ public class OpenWeatherJsonWeather {
 
         }
         JSONArray weatherArray = forcastJson.getJSONArray(OWM_LIST);
+        JSONObject cityJson = forcastJson.getJSONObject(OWM_CITY);
+        JSONObject cityCoord = cityJson.getJSONObject(OWM_COORD);
+        double cityLatitude = cityCoord.getDouble(OWM_LATITUDE);
+        double cityLongitude = cityCoord.getDouble(OWM_LONGITUDE);
+        StromfulPrefrences.setLocationDetails(context,cityLatitude,cityLongitude);
         ContentValues[] weatherContentValues = new ContentValues[weatherArray.length()];
-        long localdte = System.currentTimeMillis();
-        long utcDate = StromfulDateUtils.getUTCDateFromLocal(localdte);
-        long startDate = StromfulDateUtils.normalizeDate(localdte);
+      //  long localdte = System.currentTimeMillis();
+        long normalizedUTCStartDate = StromfulDateUtils.getNormalizedUTCDateForToday();
+      //  long startDate = StromfulDateUtils.normalizeDate(localdte);
         for (int i = 0; i < weatherArray.length(); i++) {
-            String date;
-            String highlow;
             String description;
             long datetimemillis;
             double high;
@@ -113,8 +123,7 @@ public class OpenWeatherJsonWeather {
             double windDirection;
             int weatherId;
             JSONObject dayforcast = weatherArray.getJSONObject(i);
-            datetimemillis = startDate + StromfulDateUtils.DAY_IN_MILLIS * i;
-            date = StromfulDateUtils.getFriendlyDateString(context, datetimemillis, false);
+            datetimemillis = normalizedUTCStartDate + StromfulDateUtils.DAY_IN_MILLIS * i;
             // getting weather info
             JSONObject weatherObject = dayforcast.getJSONArray(OWM_WEATHER).getJSONObject(0);
             weatherId = weatherObject.getInt(OWM_WEATHER_ID);

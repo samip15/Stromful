@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,14 +25,18 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.stromful.Data.StromfulPrefrences;
+import com.example.stromful.Data.WeatherContract;
+import com.example.stromful.Utilities.FakeDataUtils;
 import com.example.stromful.Utilities.NetworkUtils;
-import com.example.stromful.Utilities.OpenWeatherJsonWeather;
+import com.example.stromful.Utilities.OpenWeatherJsonUtils;
 import com.github.ybq.android.spinkit.SpinKitView;
 
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements ForcastAdapter.ForcastAdapterOnclickListner, LoaderManager.LoaderCallbacks<String[]>, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements ForcastAdapter.ForcastAdapterOnclickListner, LoaderManager.LoaderCallbacks<Cursor> {
     private static final int FORCAST_LOADER_ID = 0;
+    // recycler view
+    private int mPosition = RecyclerView.NO_POSITION;
     private static final String TAG = "com/example/stromful/MainActivity";
     private static final String LOCATION_QUERY = "location";
     private TextView mErrorMessageDisplay;
@@ -39,7 +45,18 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     private ForcastAdapter mForcastAdapter;
     private Context mContext = MainActivity.this;
     // if shared preference has been changed
-    private static boolean PREFRENCE_UPDATED = false;
+    // weather columns that are displayed and queried
+    public static final String[] MAIN_FORCAST_PROJECTION = {
+            WeatherContract.WeatherEntry.COLUMN_DATE,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
+    };
+    // weather table ko column ko indexes
+    public static final int INDEX_WEATHER_DATE = 0;
+    public static final int INDEX_WEATHER_MAX_TEMP = 1;
+    public static final int INDEX_WEATHER_MIN_TEMP = 2;
+    public static final int INDEX_WEATHER_CONDITION_ID = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,24 +65,34 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
         mrecycler = findViewById(R.id.recycler_view_forcast);
         mErrorMessageDisplay = findViewById(R.id.tv_error_message);
         mLoadingindicator = findViewById(R.id.progress_bar_laoding_indicator);
+        FakeDataUtils.insertFakeData(this);
         //set rv
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mrecycler.setLayoutManager(linearLayoutManager);
         mrecycler.setHasFixedSize(true);
         //adapter
-        mForcastAdapter = new ForcastAdapter(this);
+        mForcastAdapter = new ForcastAdapter(this, this);
         mrecycler.setAdapter(mForcastAdapter);
-
+        // loading indicator
+        showLoading();
         //initilizing the loader
         getSupportLoaderManager().initLoader(FORCAST_LOADER_ID, null, this);
-        // resister preference
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    /**
+     * -----------------------LOADING UI-----------------------
+     */
+
+    private void showLoading() {
+        mrecycler.setVisibility(View.INVISIBLE);
+        mLoadingindicator.setVisibility(View.VISIBLE);
     }
 
     /*
      *  ----------------------  Loading Functions --------------------------
      * */
     private void showWeatherDataView() {
+        mLoadingindicator.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mrecycler.setVisibility(View.VISIBLE);
     }
@@ -81,54 +108,30 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     /**
      * Creating a async task to fetch the data
      *
-     * @param id
      * @param args
      * @return
      */
 
     @NonNull
     @Override
-    public Loader<String[]> onCreateLoader(int id, @Nullable final Bundle args) {
-        //create a async task loader
-        return new AsyncTaskLoader<String[]>(this) {
-            String[] mWeatherData = null;
+    public Loader<Cursor> onCreateLoader(int loaderId, @Nullable final Bundle args) {
+        switch (loaderId) {
+            case FORCAST_LOADER_ID:
+                // uri
+                Uri forcastQueryUri = WeatherContract.WeatherEntry.CONTENT_URI;
+                String sortOder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+                // selection: from today onwards
+                String selection = WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards();
 
-            @Override
-            protected void onStartLoading() {
-                //-----Checking If We Have Cache Data-----------
-                if (mWeatherData != null) {
-                    deliverResult(mWeatherData);
-                }
-                mLoadingindicator.setVisibility(View.VISIBLE);
-                // triggers the load in background function to load data
-                forceLoad();
-            }
-
-            @SuppressLint("LongLogTag")
-            @Nullable
-            @Override
-            public String[] loadInBackground() {
-
-                String location = StromfulPrefrences.getPreferedWeatherLocation(mContext);
-                URL weatherRequestUrl = NetworkUtils.buildUrl(location);
-                try {
-                    String jsonWeatherResponse = NetworkUtils.getResponseFromHttpUrl(weatherRequestUrl);
-                    String[] weatherDataFromJson = OpenWeatherJsonWeather.getWeatherDataFromJson(MainActivity.this, jsonWeatherResponse);
-                    Log.e(TAG, "The weather data is " + weatherDataFromJson.length + weatherDataFromJson);
-                    return weatherDataFromJson;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-
-            }
-
-            @Override
-            public void deliverResult(@Nullable String[] mLocationJson) {
-                mWeatherData = mLocationJson;
-                super.deliverResult(mLocationJson);
-            }
-        };
+                return new CursorLoader(this,
+                        forcastQueryUri,
+                        MAIN_FORCAST_PROJECTION,
+                        selection,
+                        null,
+                        sortOder);
+            default:
+                throw new RuntimeException("Loader Not Implemented" + loaderId);
+        }
     }
 
     /**
@@ -139,16 +142,15 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
      */
 
     @Override
-    public void onLoadFinished(@NonNull Loader<String[]> loader, String[] weatherdata) {
-
-        mLoadingindicator.setVisibility(View.INVISIBLE);
-        if (weatherdata != null) {
-            showWeatherDataView();
-            mForcastAdapter.setWeatherData(weatherdata);
-
-        } else {
-            showErrorMessage();
+    public void onLoadFinished(Loader<Cursor> loader, Cursor weatherdata) {
+        mForcastAdapter.swapCursor(weatherdata);
+        if (mPosition==RecyclerView.NO_POSITION){
+            mPosition = 0;
         }
+        if (weatherdata.getCount() != 0) {
+            showWeatherDataView();
+        }
+
     }
 
     /**
@@ -157,18 +159,13 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
      * @param loader
      */
     @Override
-    public void onLoaderReset(@NonNull Loader<String[]> loader) {
-
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+        mForcastAdapter.swapCursor(null);
     }
 
 
     /* --------------------------- menue---------------------
      * */
-
-    private void invalidateData() {
-        mForcastAdapter.setWeatherData(null);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.forcast, menu);
@@ -178,11 +175,6 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_refresh) {
-            invalidateData();
-            getSupportLoaderManager().restartLoader(FORCAST_LOADER_ID, null, this);
-            return true;
-        }
         if (id == R.id.action_map) {
             openLocationInMap();
             return true;
@@ -200,9 +192,11 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
      *  ----------------------  Recyclerview OnClick --------------------------
      * */
     @Override
-    public void onClick(String weatherForDay) {
+    public void onClick(long dateInMillis) {
         Intent intent = new Intent(mContext, DetailActivity.class);
-        intent.putExtra(Intent.EXTRA_TEXT, weatherForDay);
+        // uri
+        Uri uriforDetail = WeatherContract.WeatherEntry.buildWeatherUriWithDate(dateInMillis);
+        intent.setData(uriforDetail);
         startActivity(intent);
     }
 
@@ -211,32 +205,13 @@ public class MainActivity extends AppCompatActivity implements ForcastAdapter.Fo
 
      */
     private void openLocationInMap() {
-        String address = StromfulPrefrences.getPreferedWeatherLocation(mContext);
-        Uri geoloaction = Uri.parse("geo:0,0?q=" + address);
+        double[] coords = StromfulPrefrences.getLocationCoordinate(mContext);
+        String posLat = Double.toHexString(coords[0]);
+        String posLon = Double.toHexString(coords[1]);
+        Uri geoloaction = Uri.parse("geo:" + posLat + "," + posLon);
         Intent intent = new Intent(Intent.ACTION_VIEW, geoloaction);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        PREFRENCE_UPDATED = true;
-
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (PREFRENCE_UPDATED) {
-            getSupportLoaderManager().restartLoader(FORCAST_LOADER_ID, null, this);
-            PREFRENCE_UPDATED = false;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }

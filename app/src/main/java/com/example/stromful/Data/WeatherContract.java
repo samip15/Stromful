@@ -3,6 +3,8 @@ package com.example.stromful.Data;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.example.stromful.Utilities.StromfulDateUtils;
+
 public class WeatherContract  {
     public static final String CONTENT_AUTHORITY = "com.example.stromful";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://"+CONTENT_AUTHORITY);
@@ -17,6 +19,10 @@ public class WeatherContract  {
         // content://-------/232939283293
         public static Uri buildWeatherUriWithDate(long date){
             return CONTENT_URI.buildUpon().appendPath(Long.toString(date)).build();
+        }
+        public static String getSqlSelectForTodayOnwards(){
+            long normalizedUTCNow = StromfulDateUtils.normalizeDate(System.currentTimeMillis());
+            return WeatherEntry.COLUMN_DATE + ">="+normalizedUTCNow;
         }
         // table name
         public static final String TABLE_NAME  = "weather";
