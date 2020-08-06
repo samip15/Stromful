@@ -54,9 +54,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     // weather table column ko indexes
     public static final int INDEX_WEATHER_DATE = 0;
-    public static final int INDEX_WEATHER_MAX_TEMP = 1;
+    public static final int INDEX_WEATHER_MAX_TEMP = 3;
     public static final int INDEX_WEATHER_MIN_TEMP = 2;
-    public static final int INDEX_WEATHER_CONDITION_ID = 3;
+    public static final int INDEX_WEATHER_CONDITION_ID = 1;
     public static final int INDEX_WEATHER_HUMIDITY = 4;
     public static final int INDEX_WEATHER_PRESSURE = 5;
     public static final int INDEX_WEATHER_WIND_SPEED = 6;
@@ -135,13 +135,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         // ============= weather data setting ============
 
         //icon
-        int weatherId = data.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
+        int weatherId = data.getInt(INDEX_WEATHER_CONDITION_ID);
         int weatherIconImage = StormfulWeatherUtils.getSmallArtResourceIdForWeatherCondition(weatherId);
         mDetailBinding.primaryInfo.weatherIcon.setImageResource(weatherIconImage);
 
         //getting all columns values
         //date
-        long dateInMillis = data.getLong(MainActivity.INDEX_WEATHER_DATE);
+        long dateInMillis = data.getLong(INDEX_WEATHER_DATE);
         String dateString = StormfulDateUtils.getFriendlyDateString(this, dateInMillis, false);
         mDetailBinding.primaryInfo.date.setText(dateString);
 
@@ -152,13 +152,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mDetailBinding.primaryInfo.weatherDescription.setContentDescription(descriptionAlly);
 
         //temperature
-        double highTemp = data.getDouble(MainActivity.INDEX_WEATHER_MAX_TEMP);
+        double highTemp = data.getDouble(INDEX_WEATHER_MAX_TEMP);
         String highString = StormfulWeatherUtils.formatTemperature(this, highTemp);
         String highAlly = this.getString(R.string.ally_high_temp,highString);
         mDetailBinding.primaryInfo.highTemperature.setText(highString);
         mDetailBinding.primaryInfo.highTemperature.setContentDescription(highAlly);
 
-        double lowTemp = data.getDouble(MainActivity.INDEX_WEATHER_MIN_TEMP);
+        double lowTemp = data.getDouble(INDEX_WEATHER_MIN_TEMP);
         String lowString = StormfulWeatherUtils.formatTemperature(this, lowTemp);
         String lowAlly = this.getString(R.string.ally_low_temp,lowString);
         mDetailBinding.primaryInfo.lowTemperature.setText(lowString);
