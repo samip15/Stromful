@@ -1,5 +1,6 @@
 package com.example.trystromful.utilities;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -42,8 +43,8 @@ public class NotificationUtils {
     public static final int INDEX_WEATHER_MIN_TEMP = 2;
 
 
-    public static void notifyUserOfNewWeather(Context context)
-    {
+    @SuppressLint("WrongConstant")
+    public static void notifyUserOfNewWeather(Context context) {
         //show today date in the notification
         Uri todayWeatherUri = WeatherContract.WeatherEntry.
                 buildWeatherUriWithDate(StormfulDateUtils.normalizeDate(System.currentTimeMillis()));
@@ -57,8 +58,7 @@ public class NotificationUtils {
                 null);
 
         //cursor ma bhako data lina
-        if(todayWeatherCursor.moveToFirst())
-        {
+        if (todayWeatherCursor.moveToFirst()) {
             int weatherId = todayWeatherCursor.getInt(INDEX_WEATHER_CONDITION_ID);
             double high = todayWeatherCursor.getDouble(INDEX_WEATHER_MAX_TEMP);
             double low = todayWeatherCursor.getDouble(INDEX_WEATHER_MIN_TEMP);
@@ -67,10 +67,10 @@ public class NotificationUtils {
             Resources res = context.getResources();
             int largeIconResourceId = StormfulWeatherUtils.getLargeArtResourceIdForWeatherCondition(weatherId);
 
-            Bitmap largeIcon = BitmapFactory.decodeResource(res,R.drawable.ic_baseline_desktop_mac_24);
+            Bitmap largeIcon = BitmapFactory.decodeResource(res, R.drawable.ic_baseline_desktop_mac_24);
 
             String notificationTitle = "Stormful";
-            String notificationText =getNotificationText(context,weatherId,high,low);
+            String notificationText = getNotificationText(context, weatherId, high, low);
 
             int smallIconResourceId = StormfulWeatherUtils.getSmallArtResourceIdForWeatherCondition(weatherId);
 
@@ -79,8 +79,7 @@ public class NotificationUtils {
             //oreo bhanda mathi ko devices ho bhane you need notification channel
             // haina bhane you dont need it
 
-            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O)
-            {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(
                         WEATHER_CHANNEL_ID,
                         "Weather",
@@ -89,14 +88,17 @@ public class NotificationUtils {
             }
 
             //notification
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(smallIconResourceId)
-                    .setLargeIcon(largeIcon)
-                    .setColor(ContextCompat.getColor(context,R.color.colorPrimary))
-                    .setContentTitle(notificationTitle)
-                    .setContentText(notificationText)
-                    .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
-                    .setAutoCancel(true);
+            Notification.Builder notificationBuilder = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                notificationBuilder = new Notification.Builder(context)
+                        .setSmallIcon(smallIconResourceId)
+                        .setLargeIcon(largeIcon)
+                        .setColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                        .setContentTitle(notificationTitle)
+                        .setContentText(notificationText)
+                        .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
+                        .setAutoCancel(true);
+            }
 
             //content intent for going to detail
             Intent detailIntentForToday = new Intent(context, DetailActivity.class);
@@ -110,15 +112,16 @@ public class NotificationUtils {
             notificationBuilder.setContentIntent(resultPendingIntent);
 
             //use notification manager to show notification finally
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                    && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 notificationBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
             }
-            notificationManager.notify(WEATHER_NOTIFICATION_ID,notificationBuilder.build());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                notificationManager.notify(WEATHER_NOTIFICATION_ID, notificationBuilder.build());
+            }
 
             //save the last notification sent
-            StormfulPreferences.saveLastNotificationTime(context,System.currentTimeMillis());
+            StormfulPreferences.saveLastNotificationTime(context, System.currentTimeMillis());
         }
         //always close cursor
         todayWeatherCursor.close();
@@ -127,15 +130,14 @@ public class NotificationUtils {
     /**
      * Create a notification text to display
      */
-    private static String getNotificationText(Context context, int weatherId, double high, double low)
-    {
-        String shortDesc = StormfulWeatherUtils.getStringForWeatherCondition(context,weatherId);
+    private static String getNotificationText(Context context, int weatherId, double high, double low) {
+        String shortDesc = StormfulWeatherUtils.getStringForWeatherCondition(context, weatherId);
 
         String notificationFormat = context.getString(R.string.format_notification);
         String notificationText = String.format(notificationFormat,
                 shortDesc,
-                StormfulWeatherUtils.formatTemperature(context,high),
-                StormfulWeatherUtils.formatTemperature(context,low));
+                StormfulWeatherUtils.formatTemperature(context, high),
+                StormfulWeatherUtils.formatTemperature(context, low));
 
         return notificationText;
     }
